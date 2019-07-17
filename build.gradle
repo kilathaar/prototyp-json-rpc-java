@@ -1,0 +1,37 @@
+apply plugin: "java"
+apply plugin: "application"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "com.fasterxml.jackson.core:jackson-databind:2.9.9.1"
+    compile "org.slf4j:slf4j-api:1.7.26"
+
+    runtime "ch.qos.logback:logback-classic:1.2.3"
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+mainClassName = "se.kilathaar.prototype.json_rpc.Server"
+
+jar {
+    manifest {
+        attributes "Main-Class": mainClassName
+        attributes "Class-Path": configurations.runtime.collect { "libs/" + it.getName() }.join(' ')
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task copyToLib(type: Copy) {
+    into "$buildDir/output/libs"
+    from configurations.runtime
+}
+
+build.dependsOn(copyToLib)
+
